@@ -83,9 +83,4 @@ public class JwtFilter implements Filter {
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않는 JWT 토큰입니다.");
         }
     }
-
-    @Override
-    public void destroy() {
-        Filter.super.destroy();
-    }
 }
