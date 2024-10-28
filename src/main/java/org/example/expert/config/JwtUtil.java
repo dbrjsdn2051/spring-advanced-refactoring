@@ -62,4 +62,10 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public String getSubject(String tokenValue){
+        String token = substringToken(tokenValue);
+        Claims claims = extractClaims(token);
+        return claims.getSubject();
+    }
 }
