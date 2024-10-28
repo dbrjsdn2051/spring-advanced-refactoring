@@ -1,5 +1,6 @@
 package org.example.expert.aop;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Aspect
@@ -22,9 +22,11 @@ import java.time.LocalDateTime;
 public class ApiLoggingAspect {
 
     private final JwtUtil jwtUtil;
+    private final ObjectMapper objectMapper;
 
     @Pointcut("@annotation(org.example.expert.aop.CustomLogging)")
-    public void loggingMethods(){}
+    public void loggingMethods() {
+    }
 
     @Around("loggingMethods()")
     public Object logApiRequest(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -38,16 +40,20 @@ public class ApiLoggingAspect {
 
         String userId = jwtUtil.getSubject(tokenValue);
 
-        Object response;
+        Object[] args = joinPoint.getArgs();
 
-        response = joinPoint.proceed();
+        for (Object arg : args) {
+            if (arg != null) {
+                String value = objectMapper.writeValueAsString(arg);
+                log.info("Parameters = {}", value);
+            }
+        }
 
         log.info("User ID = {}", userId);
         log.info("Request Time = {}", now);
         log.info("Request URL = {}", requestURL);
-        log.info("Response = {}", response.toString());
 
-        return response;
+        return joinPoint.proceed();
     }
 
 }
